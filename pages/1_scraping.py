@@ -3,7 +3,7 @@ import pandas as pd
 from urllib.parse import urlparse
 from scrapping import scrape_data, save_to_csv
 
-st.title("🏗️ Scraper les données")
+st.title("🏗️ Scraper les données avec SELENIUM")
 st.write("Cette page vous permet de collecter des données depuis différentes sources.")
 
 # URLs disponibles

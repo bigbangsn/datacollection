@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import matplotlib.pyplot as plt
-import numpy as np
+
 
 st.set_page_config(layout="wide")
 
@@ -16,28 +15,23 @@ fichiers = ["tv-home-cinema.csv", "telephones.csv", "ordinateurs.csv"]
 fichier = st.sidebar.selectbox("Choisissez un fichier :", fichiers)
 
 try:
-    # Chargement des données
+
     df = pd.read_csv("donnee/"+fichier)
 
-    # Prétraitement des données
-    # Conversion des prix en valeurs numériques
+
     if 'prix' in df.columns:
-        # Vérifier si les prix sont déjà des nombres ou s'ils sont encore des chaînes
+
         if df['prix'].dtype == 'object':
-            # Si ce sont des chaînes, extraire les valeurs numériques comme avant
-            # Utiliser une méthode plus robuste pour extraire les nombres
             df['prix_num'] = pd.to_numeric(df['prix'].str.extract(r'(\d+(?:\s\d+)*)').iloc[:, 0].str.replace(' ', ''), errors='coerce')
-            # Remplacer les valeurs NaN par 0 ou une autre valeur par défaut
             df['prix_num'] = df['prix_num'].fillna(0)
         else:
-            # Si ce sont déjà des nombres, les utiliser directement
             df['prix_num'] = pd.to_numeric(df['prix'], errors='coerce').fillna(0)
 
-    # S'assurer que prix_num est toujours un type numérique
+
     if 'prix_num' in df.columns:
         df['prix_num'] = pd.to_numeric(df['prix_num'], errors='coerce').fillna(0)
 
-    # Affichage des données brutes dans un expander
+    # Affichage des données dans un tableau qui peut s'etendre
     with st.expander(f"📄 Données brutes de {fichier}", expanded=False):
         st.dataframe(df)
 
@@ -50,15 +44,15 @@ try:
     with col1:
         st.subheader("Répartition par marque")
         if 'marque' in df.columns:
-            # Remplacer les valeurs N/A par "Non spécifié"
+            # Remplacement Des valeurs N/A par "Non spécifié"
             df['marque'] = df['marque'].replace('N/A', 'Non spécifié')
 
-            # Compter les occurrences de chaque marque
-            brand_counts = df['marque'].value_counts().reset_index()
-            brand_counts.columns = ['Marque', 'Nombre']
+            # comptage du nobre de produit de chaque marque
+            nombre_par_marque = df['marque'].value_counts().reset_index()
+            nombre_par_marque.columns = ['Marque', 'Nombre']
 
-            # Créer un graphique à barres
-            fig = px.bar(brand_counts, x='Marque', y='Nombre', 
+            # Création un graphique à barres
+            fig = px.bar(nombre_par_marque, x='Marque', y='Nombre', 
                          color='Marque', 
                          title="Nombre de produits par marque")
             st.plotly_chart(fig, use_container_width=True)
@@ -67,13 +61,13 @@ try:
         st.subheader("Distribution des prix")
         if 'prix_num' in df.columns:
             # Create a temporary numeric series for visualization to avoid any type issues
-            numeric_prices = pd.to_numeric(df['prix_num'], errors='coerce').fillna(0)
+            prix_numerique = pd.to_numeric(df['prix_num'], errors='coerce').fillna(0)
 
-            # Create a temporary dataframe with the numeric prices for the histogram
-            temp_df = pd.DataFrame({'prix_num': numeric_prices})
+            # creation d'un dataframem temporaiaren
+            temp_df = pd.DataFrame({'prix_num': prix_numerique})
 
-            # Créer un histogramme des prix
-            fig = px.histogram(temp_df, x='prix_num', 
+            # Création d'un histogramme des prix
+            fig = px.histogram(temp_df, x='prix_num',
                               title="Distribution des prix",
                               labels={'prix_num': 'Prix (F CFA)'},
                               nbins=20)
@@ -93,7 +87,7 @@ try:
             location_counts.columns = ['Ville', 'Nombre']
 
             # Créer un graphique circulaire
-            fig = px.pie(location_counts, values='Nombre', names='Ville', 
+            fig = px.pie(location_counts, values='Nombre', names='Ville',
                          title="Répartition par ville")
             st.plotly_chart(fig, use_container_width=True)
 
@@ -105,7 +99,7 @@ try:
             temp_df['prix_num'] = pd.to_numeric(temp_df['prix_num'], errors='coerce').fillna(0)
 
             # Créer un box plot des prix par marque
-            fig = px.box(temp_df, x='marque', y='prix_num', 
+            fig = px.box(temp_df, x='marque', y='prix_num',
                         title="Comparaison des prix par marque",
                         labels={'prix_num': 'Prix (F CFA)', 'marque': 'Marque'})
             st.plotly_chart(fig, use_container_width=True)
@@ -119,21 +113,21 @@ try:
         st.metric(label="Nombre total de produits", value=len(df))
 
     # Create a single numeric series for all statistics to ensure consistency
-    numeric_prices = None
+    prix_numerique = None
     if 'prix_num' in df.columns:
-        numeric_prices = pd.to_numeric(df['prix_num'], errors='coerce').fillna(0)
+        prix_numerique = pd.to_numeric(df['prix_num'], errors='coerce').fillna(0)
 
     with metric_col2:
-        if numeric_prices is not None:
-            st.metric(label="Prix moyen", value=f"{int(numeric_prices.mean()):,} F CFA")
+        if prix_numerique is not None:
+            st.metric(label="Prix moyen", value=f"{int(prix_numerique.mean()):,} F CFA")
 
     with metric_col3:
-        if numeric_prices is not None:
-            st.metric(label="Prix minimum", value=f"{int(numeric_prices.min()):,} F CFA")
+        if prix_numerique is not None:
+            st.metric(label="Prix minimum", value=f"{int(prix_numerique.min()):,} F CFA")
 
     with metric_col4:
-        if numeric_prices is not None:
-            st.metric(label="Prix maximum", value=f"{int(numeric_prices.max()):,} F CFA")
+        if prix_numerique is not None:
+            st.metric(label="Prix maximum", value=f"{int(prix_numerique.max()):,} F CFA")
 
     # Tableau détaillé filtrable
     st.subheader("Tableau détaillé")
@@ -157,9 +151,27 @@ try:
         # Affichage du tableau filtré
         st.dataframe(filtered_df)
 
+        # Bouton de téléchargement des données
+        csv = filtered_df.to_csv(index=False)
+        st.download_button(
+            label="⬇️ Télécharger les données",
+            data=csv,
+            file_name=f"{fichier.split('.')[0]}_filtered.csv",
+            mime="text/csv"
+        )
+
     except Exception as e:
         st.error(f"Erreur dans le filtrage des prix : {e}")
         st.dataframe(df)
+
+        # Bouton de téléchargement des données non filtrées en cas d'erreur
+        csv = df.to_csv(index=False)
+        st.download_button(
+            label="⬇️ Télécharger les données complètes",
+            data=csv,
+            file_name=f"{fichier.split('.')[0]}_complet.csv",
+            mime="text/csv"
+        )
 
 except FileNotFoundError:
     st.warning("⚠️ Fichier introuvable. Lancez d'abord le scraping.")
