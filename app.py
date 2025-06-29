@@ -6,8 +6,9 @@ st.title("EXAMEN DE SCRAPING DIT ")
 st.write("👋 Salut ! Bienvenue dans l'interface de scraping de données.")
 
 st.sidebar.title("MENU")
-st.sidebar.markdown("[🏗️ Scraper les données](/1_scraping)")
+st.sidebar.markdown("[🏗️ Scraper les données avec SELENIUM](/1_scraping)")
 st.sidebar.markdown("[📊 Visualiser les données](/2_visualisation)")
+st.sidebar.markdown("[📝 Évaluation](/3_evaluation)")
 
 st.write("🤓 Etudiant : Abdoulaye DRAME")
 st.write("🎒 Niveau   : Master 1 IA, Groupe 1")
